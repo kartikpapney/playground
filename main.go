@@ -189,8 +189,8 @@ func main() {
 	port := getEnv("PORT", "8080")
 	log.Printf("Starting server on port %s", port)
 
-	http.HandleFunc("/execute", executeCode)
-	http.HandleFunc("/default", getDefaultCode)
+	http.HandleFunc("/playground/execute", executeCode)
+	http.HandleFunc("/playground/default", getDefaultCode)
 	http.HandleFunc("/", handleRoot)
 
 	log.Fatal(http.ListenAndServe(":"+port, nil))
