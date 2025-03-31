@@ -38,10 +38,6 @@ func getEnv(key, fallback string) string {
 }
 
 func executeCode(w http.ResponseWriter, r *http.Request) {
-	// CORS headers for /execute
-	// w.Header().Set("Access-Control-Allow-Origin", "*")
-	// w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-	// w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	if r.Method == http.MethodOptions {
 		return // Handle preflight requests
@@ -64,10 +60,12 @@ func executeCode(w http.ResponseWriter, r *http.Request) {
 	switch req.Language {
 	case "python":
 		image = "python:3.9-slim"
-		cmd = []string{"python", "-c", req.Code}
 		if req.Input != "" {
-			cmd = append(cmd, req.Input)
+			cmd = []string{"sh", "-c", fmt.Sprintf("echo '%s' | python -c \"%s\"", req.Input, req.Code)}
+		} else {
+			cmd = []string{"python", "-c", req.Code}
 		}
+
 	case "java":
 		image = "openjdk:17-jdk-slim"
 		className := "Main"
@@ -78,9 +76,10 @@ func executeCode(w http.ResponseWriter, r *http.Request) {
 		}
 	case "javascript":
 		image = "node:16-slim"
-		cmd = []string{"node", "-e", req.Code}
 		if req.Input != "" {
-			cmd = append(cmd, req.Input)
+			cmd = []string{"sh", "-c", fmt.Sprintf("echo '%s' | node -e \"%s\"", req.Input, req.Code)}
+		} else {
+			cmd = []string{"node", "-e", req.Code}
 		}
 	default:
 		http.Error(w, "Language not supported", http.StatusBadRequest)
@@ -99,7 +98,7 @@ func executeCode(w http.ResponseWriter, r *http.Request) {
 		"run",
 		"--rm",           // Remove container after execution
 		"--memory=512m",  // Limit memory
-		"--cpus=1",     // Limit CPU
+		"--cpus=1",       // Limit CPU
 		"--network=none", // No network access
 		image,            // Image name
 	}
@@ -130,11 +129,6 @@ func executeCode(w http.ResponseWriter, r *http.Request) {
 }
 
 func getDefaultCode(w http.ResponseWriter, r *http.Request) {
-	// CORS headers for /defaultCode
-	// w.Header().Set("Access-Control-Allow-Origin", "*")
-	// w.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
-	// w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-
 	if r.Method == http.MethodOptions {
 		return // Handle preflight requests
 	}
@@ -155,10 +149,6 @@ func getDefaultCode(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {
-	// CORS headers for /
-	// w.Header().Set("Access-Control-Allow-Origin", "*")
-	// w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-	// w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 	if r.Method == http.MethodOptions {
 		return // Handle preflight requests
