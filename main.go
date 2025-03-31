@@ -98,8 +98,8 @@ func executeCode(w http.ResponseWriter, r *http.Request) {
 	dockerArgs := []string{
 		"run",
 		"--rm",           // Remove container after execution
-		"--memory=1024m",  // Limit memory
-		"--cpus=2",     // Limit CPU
+		"--memory=512m",  // Limit memory
+		"--cpus=1",     // Limit CPU
 		"--network=none", // No network access
 		image,            // Image name
 	}
