@@ -1,6 +1,15 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+
+interface LanguageOption {
+  value: string;
+  label: string;
+}
+
+type ErrorWithMessage = {
+  message: string;
+};
 
 const CodeExecutionEngine: React.FC = () => {
   const [code, setCode] = useState<string>('');
@@ -11,7 +20,7 @@ const CodeExecutionEngine: React.FC = () => {
   const [dropdownOpen, setDropdownOpen] = useState<boolean>(false);
   const [hasError, setHasError] = useState<boolean>(false);
 
-  const languages = [
+  const languages: LanguageOption[] = [
     { value: 'python', label: 'Python' },
     { value: 'javascript', label: 'JavaScript' },
     { value: 'java', label: 'Java' }
@@ -20,11 +29,7 @@ const CodeExecutionEngine: React.FC = () => {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const codeRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    fetchDefaultCode();
-  }, [language]);
-
-  const fetchDefaultCode = async () => {
+  const fetchDefaultCode = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/default`);
@@ -33,12 +38,17 @@ const CodeExecutionEngine: React.FC = () => {
       }
       const data = await response.json();
       setCode(data[language]);
-    } catch (error: any) {
-      setCode(`// Failed to fetch default code: ${error.message}`);
+    } catch (error: unknown) {
+      const errorWithMessage = error as ErrorWithMessage;
+      setCode(`// Failed to fetch default code: ${errorWithMessage.message}`);
     } finally {
       setLoading(false);
     }
-  };
+  }, [language]);
+  
+  useEffect(() => {
+    fetchDefaultCode();
+  }, [fetchDefaultCode]);
 
   const handleRun = async () => {
     setLoading(true);
@@ -70,9 +80,10 @@ const CodeExecutionEngine: React.FC = () => {
       } else {
         setOutput(data.output);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorWithMessage = error as ErrorWithMessage;
       setHasError(true);
-      setOutput(`Error: ${error.message}`);
+      setOutput(`Error: ${errorWithMessage.message}`);
     } finally {
       setLoading(false);
     }
@@ -216,7 +227,7 @@ const CodeExecutionEngine: React.FC = () => {
               hasError ? 'bg-red-50 text-red-800' : output ? 'bg-green-50 text-green-800' : 'bg-gray-50'
             }`}
           >
-            {output || <span className="text-gray-400">// Output will appear here</span>}
+            {output || <span className="text-gray-400">{/* Output will appear here */}</span>}
           </div>
         </div>
       </div>
