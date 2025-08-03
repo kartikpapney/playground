@@ -154,11 +154,6 @@ func handleRoot(w http.ResponseWriter, r *http.Request) {
 		return // Handle preflight requests
 	}
 
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"message": "Welcome to code execution API. Send POST request to /execute"})
 }
@@ -181,7 +176,7 @@ func main() {
 
 	http.HandleFunc("/playground/execute", executeCode)
 	http.HandleFunc("/playground/default", getDefaultCode)
-	http.HandleFunc("/", handleRoot)
+	http.HandleFunc("/playground/", handleRoot)
 
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
