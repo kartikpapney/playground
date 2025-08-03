@@ -176,7 +176,7 @@ func main() {
 
 	http.HandleFunc("/playground/execute", executeCode)
 	http.HandleFunc("/playground/default", getDefaultCode)
-	http.HandleFunc("/playground/", handleRoot)
+	http.HandleFunc("/playground", handleRoot)
 
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
